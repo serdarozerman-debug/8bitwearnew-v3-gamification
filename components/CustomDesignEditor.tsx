@@ -27,55 +27,147 @@ interface DesignElement {
   fontStyle?: 'normal' | 'italic'
 }
 
-// Draggable Element Component
+// Draggable Element Component with Resize Handles
 function DraggableElement({ 
   id, 
   element, 
   isSelected, 
-  onSelect 
+  onSelect,
+  onResize
 }: {
   id: string
   element: DesignElement
   isSelected: boolean
   onSelect: () => void
+  onResize: (id: string, newWidth: number, newHeight: number) => void
 }) {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: id,
   })
+  
+  const [isResizing, setIsResizing] = useState(false)
+  const [resizeStart, setResizeStart] = useState({ x: 0, y: 0, width: 0, height: 0 })
 
   const style = {
     position: 'absolute' as const,
     left: element.position.x,
     top: element.position.y,
     transform: transform ? CSS.Translate.toString(transform) : undefined,
-    cursor: 'move',
+    cursor: isResizing ? 'nwse-resize' : 'move',
+  }
+
+  // Resize handler (köşe handle'larından sürüklendiğinde)
+  const handleResizeMouseDown = (e: React.MouseEvent, corner: 'nw' | 'ne' | 'sw' | 'se') => {
+    e.stopPropagation()
+    e.preventDefault()
+    
+    setIsResizing(true)
+    setResizeStart({
+      x: e.clientX,
+      y: e.clientY,
+      width: element.imageWidth || 200,
+      height: element.imageHeight || 200,
+    })
+    
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      const deltaX = moveEvent.clientX - e.clientX
+      const deltaY = moveEvent.clientY - e.clientY
+      
+      let newWidth = resizeStart.width
+      let newHeight = resizeStart.height
+      
+      // Köşeye göre resize direction
+      if (corner === 'se') {
+        newWidth = resizeStart.width + deltaX
+        newHeight = resizeStart.height + deltaY
+      } else if (corner === 'sw') {
+        newWidth = resizeStart.width - deltaX
+        newHeight = resizeStart.height + deltaY
+      } else if (corner === 'ne') {
+        newWidth = resizeStart.width + deltaX
+        newHeight = resizeStart.height - deltaY
+      } else if (corner === 'nw') {
+        newWidth = resizeStart.width - deltaX
+        newHeight = resizeStart.height - deltaY
+      }
+      
+      // Min/max sınırları
+      newWidth = Math.max(50, Math.min(600, newWidth))
+      newHeight = Math.max(50, Math.min(600, newHeight))
+      
+      onResize(id, newWidth, newHeight)
+    }
+    
+    const handleMouseUp = () => {
+      setIsResizing(false)
+      document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseup', handleMouseUp)
+    }
+    
+    document.addEventListener('mousemove', handleMouseMove)
+    document.addEventListener('mouseup', handleMouseUp)
   }
 
   return (
     <div
       ref={setNodeRef}
       style={style}
-      {...listeners}
-      {...attributes}
-      className={isSelected ? 'ring-4 ring-purple-500 rounded' : ''}
+      {...(isResizing ? {} : listeners)}  // Resize sırasında drag'i devre dışı bırak
+      {...(isResizing ? {} : attributes)}
+      className={isSelected ? 'ring-2 ring-purple-500 rounded' : ''}
       onClick={(e) => {
         e.stopPropagation()
         onSelect()
       }}
     >
       {element.type === 'image' && element.imageUrl && (
-        <img
-          src={element.imageUrl}
-          alt="Design"
-          style={{
-            width: element.imageWidth,
-            height: element.imageHeight,
-            objectFit: 'contain',
-            transform: element.rotation ? `rotate(${element.rotation}deg)` : undefined,
-            pointerEvents: 'none',
-          }}
-          draggable={false}
-        />
+        <>
+          <img
+            src={element.imageUrl}
+            alt="Design"
+            style={{
+              width: element.imageWidth,
+              height: element.imageHeight,
+              objectFit: 'contain',
+              transform: element.rotation ? `rotate(${element.rotation}deg)` : undefined,
+              pointerEvents: 'none',
+            }}
+            draggable={false}
+          />
+          
+          {/* Resize Handles (sadece seçili ise göster) */}
+          {isSelected && (
+            <>
+              {/* NW - Sol Üst */}
+              <div
+                onMouseDown={(e) => handleResizeMouseDown(e, 'nw')}
+                className="absolute -top-2 -left-2 w-4 h-4 bg-white border-2 border-purple-500 rounded-full cursor-nwse-resize hover:bg-purple-500 transition"
+                style={{ zIndex: 10 }}
+              />
+              
+              {/* NE - Sağ Üst */}
+              <div
+                onMouseDown={(e) => handleResizeMouseDown(e, 'ne')}
+                className="absolute -top-2 -right-2 w-4 h-4 bg-white border-2 border-purple-500 rounded-full cursor-nesw-resize hover:bg-purple-500 transition"
+                style={{ zIndex: 10, right: '-8px' }}
+              />
+              
+              {/* SW - Sol Alt */}
+              <div
+                onMouseDown={(e) => handleResizeMouseDown(e, 'sw')}
+                className="absolute -bottom-2 -left-2 w-4 h-4 bg-white border-2 border-purple-500 rounded-full cursor-nesw-resize hover:bg-purple-500 transition"
+                style={{ zIndex: 10, bottom: '-8px' }}
+              />
+              
+              {/* SE - Sağ Alt */}
+              <div
+                onMouseDown={(e) => handleResizeMouseDown(e, 'se')}
+                className="absolute -bottom-2 -right-2 w-4 h-4 bg-white border-2 border-purple-500 rounded-full cursor-nwse-resize hover:bg-purple-500 transition"
+                style={{ zIndex: 10, right: '-8px', bottom: '-8px' }}
+              />
+            </>
+          )}
+        </>
       )}
 
       {element.type === 'text' && (
@@ -204,7 +296,7 @@ export default function CustomDesignEditor({
             
             setElements(prev => [...prev, newElement])
             setSelectedElement(tempId)
-            toast.success('✨ Pixel art dönüşümü tamamlandı!', { id: 'ai-conversion' })
+            toast.success(`✨ Pixel art dönüşümü tamamlandı! (${data.method || 'unknown'})`, { id: 'ai-conversion' })
           } else {
             // ❌ Başarısız - görsel ekleme yok
             console.warn('[Upload] AI conversion failed:', data.error)
@@ -259,7 +351,7 @@ export default function CustomDesignEditor({
     toast.success('Element silindi')
   }
 
-  // Görsel boyutlandırma
+  // Görsel boyutlandırma (manuel resize handler)
   const handleImageResize = (id: string, scale: number) => {
     setElements(prev => prev.map(el => {
       if (el.id === id && el.type === 'image') {
@@ -267,6 +359,20 @@ export default function CustomDesignEditor({
           ...el,
           imageWidth: (el.imageWidth || 150) * scale,
           imageHeight: (el.imageHeight || 150) * scale,
+        }
+      }
+      return el
+    }))
+  }
+  
+  // Görsel boyutlandırma (drag handle'dan)
+  const handleResizeDrag = (id: string, newWidth: number, newHeight: number) => {
+    setElements(prev => prev.map(el => {
+      if (el.id === id && el.type === 'image') {
+        return {
+          ...el,
+          imageWidth: newWidth,
+          imageHeight: newHeight,
         }
       }
       return el
@@ -558,6 +664,7 @@ export default function CustomDesignEditor({
                   element={element}
                   isSelected={selectedElement === element.id}
                   onSelect={() => setSelectedElement(element.id)}
+                  onResize={handleResizeDrag}
                 />
               )
             })}

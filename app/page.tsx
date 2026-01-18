@@ -16,7 +16,7 @@ export default function Home() {
               <h1 className="text-5xl md:text-6xl font-bold mb-6 animate-fade-in">
                 Hayalinizdeki Tasarımı <br />
                 <span className="text-yellow-300">AI ile Gerçeğe</span> Dönüştürün
-              </h1>
+          </h1>
               <p className="text-xl md:text-2xl mb-8 text-purple-100">
                 Kişiye özel 3D baskılı tişört, sweatshirt ve hoodie. 
                 Tasarımınızı yükleyin, AI iyileştirsin, biz üretelim!
@@ -127,8 +127,8 @@ export default function Home() {
                 <h3 className="font-bold text-xl mb-2">Kaliteli Baskı</h3>
                 <p className="text-gray-600">
                   3D baskı teknolojisi ile yüksek kaliteli, dayanıklı ürünler.
-                </p>
-              </div>
+          </p>
+        </div>
             </div>
           </div>
         </section>
@@ -149,7 +149,7 @@ export default function Home() {
               <span>Ürünleri Keşfet</span>
               <ArrowRight className="w-6 h-6" />
             </Link>
-          </div>
+        </div>
         </section>
       </main>
 

@@ -10,7 +10,7 @@ const MOCK_PRODUCTS = [
     description: 'Yüksek kaliteli %100 pamuklu tişört. Kişiye özel tasarımlar için mükemmel.',
     basePrice: '199.99',
     category: 'TSHIRT',
-    images: [],
+    images: ['/white-tshirt.png'],
     isActive: true,
     variants: [
       {
@@ -43,7 +43,7 @@ const MOCK_PRODUCTS = [
     description: 'Kaliteli sweatshirt. Kişiye özel baskılar için ideal.',
     basePrice: '299.99',
     category: 'SWEATSHIRT',
-    images: [],
+    images: ['/white-tshirt.png'],
     isActive: true,
     variants: [
       {
@@ -69,7 +69,7 @@ const MOCK_PRODUCTS = [
     description: 'Kapüşonlu sweatshirt. AI destekli tasarımlar için harika.',
     basePrice: '349.99',
     category: 'HOODIE',
-    images: [],
+    images: ['/white-tshirt.png'],
     isActive: true,
     variants: [
       {
