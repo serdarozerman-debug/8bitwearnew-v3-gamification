@@ -1,9 +1,12 @@
 import Stripe from 'stripe'
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+// Stripe is optional - only initialize if key is provided
+const stripeKey = process.env.STRIPE_SECRET_KEY || ''
+
+export const stripe = stripeKey ? new Stripe(stripeKey, {
   apiVersion: '2025-12-15.clover',
   typescript: true,
-})
+}) : null
 
 export interface CreatePaymentIntentParams {
   amount: number // kuruş cinsinden
@@ -14,6 +17,10 @@ export interface CreatePaymentIntentParams {
 
 export async function createPaymentIntent(params: CreatePaymentIntentParams) {
   const { amount, orderId, customerEmail, metadata } = params
+
+  if (!stripe) {
+    throw new Error('Stripe is not configured. Please add STRIPE_SECRET_KEY to environment variables.')
+  }
 
   try {
     const paymentIntent = await stripe.paymentIntents.create({
@@ -41,6 +48,10 @@ export async function createPaymentIntent(params: CreatePaymentIntentParams) {
 }
 
 export async function retrievePaymentIntent(paymentIntentId: string) {
+  if (!stripe) {
+    throw new Error('Stripe is not configured')
+  }
+  
   try {
     const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId)
     return paymentIntent
@@ -51,6 +62,10 @@ export async function retrievePaymentIntent(paymentIntentId: string) {
 }
 
 export async function createRefund(paymentIntentId: string, amount?: number) {
+  if (!stripe) {
+    throw new Error('Stripe is not configured')
+  }
+  
   try {
     const refund = await stripe.refunds.create({
       payment_intent: paymentIntentId,
@@ -67,6 +82,10 @@ export async function constructWebhookEvent(
   payload: string | Buffer,
   signature: string
 ) {
+  if (!stripe) {
+    throw new Error('Stripe is not configured')
+  }
+  
   try {
     const event = stripe.webhooks.constructEvent(
       payload,
