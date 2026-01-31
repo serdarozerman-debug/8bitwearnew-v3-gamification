@@ -160,7 +160,7 @@ export async function GET(req: NextRequest) {
       success: true,
       stats: {
         totalOrders,
-        totalRevenue: totalRevenue._sum.totalAmount || 0,
+        totalRevenue: Number(totalRevenue._sum.totalAmount || 0),
         pendingOrders,
         completedOrders,
         totalCustomers,
