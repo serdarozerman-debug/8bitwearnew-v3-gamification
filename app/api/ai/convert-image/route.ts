@@ -74,8 +74,8 @@ export async function POST(req: NextRequest) {
     
     console.log('[AI Convert] PNG created, size:', pngBuffer.length, 'bytes', `${width}x${height}`)
     
-    // PNG File objesi oluştur
-    const imageFile = new File([pngBuffer], 'input.png', { type: 'image/png' })
+    // PNG File objesi oluştur (Buffer'ı Uint8Array'e dönüştür)
+    const imageFile = new File([new Uint8Array(pngBuffer)], 'input.png', { type: 'image/png' })
     
     console.log('[AI Convert] Image file ready, no mask needed (using transparent background)')
 

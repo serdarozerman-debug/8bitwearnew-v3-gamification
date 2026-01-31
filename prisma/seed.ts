@@ -72,6 +72,7 @@ async function main() {
       create: {
         ...productData,
         isActive: true,
+        category: productData.category as any, // TypeScript type fix
       },
     })
     console.log('✅ Ürün oluşturuldu:', product.name)

@@ -67,7 +67,6 @@ export default function TestV3EditorPage() {
   return (
     <div>
       <CustomDesignEditorV3
-        product={mockProduct}
         productImage={getMockupImage()}
         productName={mockProduct.name}
         productColor={selectedColor}
