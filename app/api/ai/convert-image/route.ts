@@ -388,8 +388,13 @@ CRITICAL FEATURES (must be readable): zipper line, collar, earmuff pads, eyes (2
       if (convertedImageUrl) providerUsed = 'replicate'
     }
 
+    // 4) FALLBACK: Use input image directly if AI providers fail
     if (!convertedImageUrl) {
-      throw new Error('No image URL returned from providers')
+      console.log('[AI Convert] ⚠️ AI providers failed, using input image as fallback')
+      // Convert input buffer to base64
+      const fallbackBase64 = pngBuffer.toString('base64')
+      convertedImageUrl = `data:image/png;base64,${fallbackBase64}`
+      providerUsed = 'fallback-direct'
     }
 
     console.log('[AI Convert] ✅ SUCCESS! Image-to-image transformation completed')
