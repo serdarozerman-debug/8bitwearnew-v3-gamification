@@ -714,12 +714,13 @@ CRITICAL FEATURES (must be readable): zipper line, collar, earmuff pads, eyes (2
       originalPrompt: prompt,
     })
   } catch (error: any) {
-    console.error('[AI Convert] ❌ Error:', error)
+    console.error('[AI Convert] ❌ CRITICAL ERROR:', error)
     console.error('[AI Convert] Error details:', {
       message: error.message,
       code: error.code,
       type: error.type,
       status: error.status,
+      stack: error.stack?.substring(0, 500)
     })
 
     if (error.code === 'content_policy_violation') {
@@ -728,6 +729,7 @@ CRITICAL FEATURES (must be readable): zipper line, collar, earmuff pads, eyes (2
           success: false,
           error: 'Görsel içeriği OpenAI politikalarına uygun değil',
           details: error.message,
+          debugInfo: { code: error.code, type: error.type }
         },
         { status: 400 }
       )
@@ -739,6 +741,7 @@ CRITICAL FEATURES (must be readable): zipper line, collar, earmuff pads, eyes (2
           success: false,
           error: 'API limiti aşıldı, lütfen biraz bekleyin',
           details: error.message,
+          debugInfo: { code: error.code, type: error.type }
         },
         { status: 429 }
       )
@@ -750,17 +753,25 @@ CRITICAL FEATURES (must be readable): zipper line, collar, earmuff pads, eyes (2
           success: false,
           error: 'API key geçersiz',
           details: 'Lütfen OPENAI_API_KEY ortam değişkenini kontrol edin',
+          debugInfo: { code: error.code, type: error.type }
         },
         { status: 401 }
       )
     }
 
+    // ⚠️ RETURN FULL ERROR DETAILS FOR DEBUGGING
     return NextResponse.json(
       { 
         success: false,
         error: error.message || 'Görsel dönüştürülemedi',
+        details: error.toString(),
         code: error.code,
         type: error.type,
+        stack: error.stack?.substring(0, 300),
+        debugInfo: {
+          name: error.name,
+          constructor: error.constructor?.name
+        }
       },
       { status: 500 }
     )
