@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { DndContext, DragEndEvent, useDraggable } from '@dnd-kit/core'
+import { DndContext, DragEndEvent, DragStartEvent, useDraggable, PointerSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
 import { HexColorPicker } from 'react-colorful'
 import { Upload, Type, Image as ImageIcon, Trash2, ZoomIn, ZoomOut, RotateCw, Save } from 'lucide-react'
@@ -80,30 +80,41 @@ function DraggableElement({
     cursor: isResizing ? 'nwse-resize' : 'move',
   }
 
-  // Resize handler (köşe handle'larından sürüklendiğinde)
-  const handleResizeMouseDown = (e: React.MouseEvent, corner: 'nw' | 'ne' | 'sw' | 'se') => {
+  // Resize handler (köşe handle'larından sürüklendiğinde - Mouse & Touch)
+  const handleResizeStart = (
+    e: React.MouseEvent | React.TouchEvent, 
+    corner: 'nw' | 'ne' | 'sw' | 'se'
+  ) => {
     e.stopPropagation()
     e.preventDefault()
     
+    // Touch veya Mouse event'ten koordinat al
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY
+    
     setIsResizing(true)
     setResizeStart({
-      x: e.clientX,
-      y: e.clientY,
-      width: element.imageWidth || 45,  // V2 ile aynı default
-      height: element.imageHeight || 45, // V2 ile aynı default
+      x: clientX,
+      y: clientY,
+      width: element.imageWidth || 45,
+      height: element.imageHeight || 45,
     })
     
-    const handleMouseMove = (moveEvent: MouseEvent) => {
-      const deltaX = moveEvent.clientX - e.clientX
-      const deltaY = moveEvent.clientY - e.clientY
+    const handleMove = (moveEvent: MouseEvent | TouchEvent) => {
+      const moveClientX = 'touches' in moveEvent ? moveEvent.touches[0].clientX : moveEvent.clientX
+      const moveClientY = 'touches' in moveEvent ? moveEvent.touches[0].clientY : moveEvent.clientY
+      
+      const deltaX = moveClientX - clientX
+      const deltaY = moveClientY - clientY
       
       let newWidth = resizeStart.width
       let newHeight = resizeStart.height
       
-      // Köşeye göre resize direction
+      // Sağ alt köşeden resize - orantılı
       if (corner === 'se') {
-        newWidth = resizeStart.width + deltaX
-        newHeight = resizeStart.height + deltaY
+        const avgDelta = (deltaX + deltaY) / 2
+        newWidth = resizeStart.width + avgDelta
+        newHeight = resizeStart.height + avgDelta
       } else if (corner === 'sw') {
         newWidth = resizeStart.width - deltaX
         newHeight = resizeStart.height + deltaY
@@ -116,20 +127,24 @@ function DraggableElement({
       }
       
       // Min/max sınırları
-      newWidth = Math.max(50, Math.min(600, newWidth))
-      newHeight = Math.max(50, Math.min(600, newHeight))
+      newWidth = Math.max(30, Math.min(300, newWidth))
+      newHeight = Math.max(30, Math.min(300, newHeight))
       
       onResize(id, newWidth, newHeight)
     }
     
-    const handleMouseUp = () => {
+    const handleEnd = () => {
       setIsResizing(false)
-      document.removeEventListener('mousemove', handleMouseMove)
-      document.removeEventListener('mouseup', handleMouseUp)
+      document.removeEventListener('mousemove', handleMove as any)
+      document.removeEventListener('mouseup', handleEnd)
+      document.removeEventListener('touchmove', handleMove as any)
+      document.removeEventListener('touchend', handleEnd)
     }
     
-    document.addEventListener('mousemove', handleMouseMove)
-    document.addEventListener('mouseup', handleMouseUp)
+    document.addEventListener('mousemove', handleMove as any)
+    document.addEventListener('mouseup', handleEnd)
+    document.addEventListener('touchmove', handleMove as any, { passive: false })
+    document.addEventListener('touchend', handleEnd)
   }
 
   return (
@@ -177,33 +192,42 @@ function DraggableElement({
           {/* Resize Handles (sadece seçili ise göster) */}
           {isSelected && (
             <>
-              {/* NW - Sol Üst */}
-              <div
-                onMouseDown={(e) => handleResizeMouseDown(e, 'nw')}
-                className="absolute -top-2 -left-2 w-4 h-4 bg-white border-2 border-purple-500 rounded-full cursor-nwse-resize hover:bg-purple-500 transition"
-                style={{ zIndex: 10 }}
-              />
+              {/* Desktop: 4 köşe handle - Mobilde gizli */}
+              <div className="hidden md:block">
+                {/* NW - Sol Üst */}
+                <div
+                  onMouseDown={(e) => handleResizeStart(e, 'nw')}
+                  className="absolute -top-2 -left-2 w-4 h-4 bg-white border-2 border-purple-500 rounded-full cursor-nwse-resize hover:bg-purple-500 transition"
+                  style={{ zIndex: 10 }}
+                />
+                
+                {/* NE - Sağ Üst */}
+                <div
+                  onMouseDown={(e) => handleResizeStart(e, 'ne')}
+                  className="absolute -top-2 -right-2 w-4 h-4 bg-white border-2 border-purple-500 rounded-full cursor-nesw-resize hover:bg-purple-500 transition"
+                  style={{ zIndex: 10, right: '-8px' }}
+                />
+                
+                {/* SW - Sol Alt */}
+                <div
+                  onMouseDown={(e) => handleResizeStart(e, 'sw')}
+                  className="absolute -bottom-2 -left-2 w-4 h-4 bg-white border-2 border-purple-500 rounded-full cursor-nesw-resize hover:bg-purple-500 transition"
+                  style={{ zIndex: 10, bottom: '-8px' }}
+                />
+              </div>
               
-              {/* NE - Sağ Üst */}
+              {/* SE - Sağ Alt (HEM DESKTOP HEM MOBİL) */}
               <div
-                onMouseDown={(e) => handleResizeMouseDown(e, 'ne')}
-                className="absolute -top-2 -right-2 w-4 h-4 bg-white border-2 border-purple-500 rounded-full cursor-nesw-resize hover:bg-purple-500 transition"
-                style={{ zIndex: 10, right: '-8px' }}
-              />
-              
-              {/* SW - Sol Alt */}
-              <div
-                onMouseDown={(e) => handleResizeMouseDown(e, 'sw')}
-                className="absolute -bottom-2 -left-2 w-4 h-4 bg-white border-2 border-purple-500 rounded-full cursor-nesw-resize hover:bg-purple-500 transition"
-                style={{ zIndex: 10, bottom: '-8px' }}
-              />
-              
-              {/* SE - Sağ Alt */}
-              <div
-                onMouseDown={(e) => handleResizeMouseDown(e, 'se')}
-                className="absolute -bottom-2 -right-2 w-4 h-4 bg-white border-2 border-purple-500 rounded-full cursor-nwse-resize hover:bg-purple-500 transition"
-                style={{ zIndex: 10, right: '-8px', bottom: '-8px' }}
-              />
+                onMouseDown={(e) => handleResizeStart(e, 'se')}
+                onTouchStart={(e) => handleResizeStart(e, 'se')}
+                className="absolute -bottom-2 -right-2 w-8 h-8 md:w-4 md:h-4 bg-gradient-to-br from-purple-500 to-pink-500 border-2 border-white rounded-full shadow-lg cursor-nwse-resize hover:scale-110 transition-all"
+                style={{ zIndex: 10, right: '-12px', bottom: '-12px' }}
+              >
+                {/* Mobilde resize ikonu */}
+                <div className="md:hidden absolute inset-0 flex items-center justify-center text-white text-xs font-bold">
+                  ⤢
+                </div>
+              </div>
             </>
           )}
         </>
@@ -246,6 +270,7 @@ export default function CustomDesignEditor({
   const [selectedElement, setSelectedElement] = useState<string | null>(null)
   const [showColorPicker, setShowColorPicker] = useState(false)
   const [uploadingImage, setUploadingImage] = useState(false)
+  const [isDraggingElement, setIsDraggingElement] = useState(false) // Scroll lock için
   const fileInputRef = useRef<HTMLInputElement>(null)
   
   // Fun loading messages for kids
@@ -285,9 +310,41 @@ export default function CustomDesignEditor({
   const [fontWeight, setFontWeight] = useState<'normal' | 'bold'>('normal')
   const [fontStyle, setFontStyle] = useState<'normal' | 'italic'>('normal')
 
+  // DnD Kit sensors with touch support
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8, // 8px hareket etmeden drag başlamasın
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 100, // 100ms basılı tutulunca drag başlasın (scroll'u engellemeden önce)
+        tolerance: 5,
+      },
+    })
+  )
+
+  // Drag start handler - scroll lock için
+  const handleDragStart = (event: DragStartEvent) => {
+    setIsDraggingElement(true)
+    // Body scroll'u engelle (mobilde)
+    if (typeof window !== 'undefined') {
+      document.body.style.overflow = 'hidden'
+      document.body.style.touchAction = 'none'
+    }
+  }
+
   // Drag end handler - KRITIK: Bu olmadan drag çalışmaz
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, delta } = event
+    
+    setIsDraggingElement(false)
+    // Body scroll'u tekrar aktif et
+    if (typeof window !== 'undefined') {
+      document.body.style.overflow = ''
+      document.body.style.touchAction = ''
+    }
     
     setElements(prev => prev.map(el => {
       if (el.id === active.id) {
@@ -911,13 +968,19 @@ export default function CustomDesignEditor({
           </h3>
           
           <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-xl">
-            <DndContext onDragEnd={handleDragEnd}>
+            <DndContext 
+              sensors={sensors}
+              onDragStart={handleDragStart}
+              onDragEnd={handleDragEnd}
+            >
               <div 
                 className="relative mx-auto bg-gray-50 rounded-xl overflow-hidden shadow-inner"
                 style={{ 
                   width: '500px', 
                   height: '600px',
                   maxWidth: '100%',
+                  maxHeight: window.innerWidth < 768 ? '500px' : '600px', // Mobilde 500px fixed
+                  touchAction: isDraggingElement ? 'none' : 'auto', // Mobilde scroll lock
                 }}
                 onClick={(e) => {
                   // Boş alana tıklanırsa seçimi kaldır
