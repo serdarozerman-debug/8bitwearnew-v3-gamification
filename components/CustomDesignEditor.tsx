@@ -455,6 +455,41 @@ export default function CustomDesignEditor({
       
       {/* LEFT PANEL */}
       <div className="bubble-card p-6 space-y-4">
+      
+        {/* Product Islands - 2x2 Grid */}
+        <div>
+          <h3 className="font-black text-lg mb-3">🎮 ÜRÜN SEÇ</h3>
+          <div className="grid grid-cols-2 gap-2">
+            <button className="aspect-square rounded-2xl p-3 bg-gradient-to-br from-blue-500 to-blue-600 text-white font-bold shadow-lg hover:scale-105 transition-all flex flex-col items-center justify-center gap-1">
+              <span className="text-3xl">👕</span>
+              <span className="text-xs">Tişört</span>
+            </button>
+            <button className="aspect-square rounded-2xl p-3 bg-gradient-to-br from-pink-500 to-pink-600 text-white font-bold shadow-lg hover:scale-105 transition-all flex flex-col items-center justify-center gap-1">
+              <span className="text-3xl">🧥</span>
+              <span className="text-xs">Sweatshirt</span>
+            </button>
+            <button className="aspect-square rounded-2xl p-3 bg-gradient-to-br from-cyan-400 to-cyan-500 text-white font-bold shadow-lg hover:scale-105 transition-all flex flex-col items-center justify-center gap-1">
+              <span className="text-3xl">🎒</span>
+              <span className="text-xs">Çanta</span>
+            </button>
+            <button className="aspect-square rounded-2xl p-3 bg-gradient-to-br from-green-400 to-green-500 text-white font-bold shadow-lg hover:scale-105 transition-all flex flex-col items-center justify-center gap-1">
+              <span className="text-3xl">🧢</span>
+              <span className="text-xs">Şapka</span>
+            </button>
+          </div>
+        </div>
+        
+        {/* Circular Colors */}
+        <div>
+          <h3 className="font-black text-sm mb-2">🎨 RENK</h3>
+          <div className="flex flex-wrap gap-2">
+            <button className="w-10 h-10 rounded-full bg-white border-4 border-purple-600 shadow-md hover:scale-110 transition-all"></button>
+            <button className="w-10 h-10 rounded-full bg-black border-4 border-transparent hover:border-purple-400 shadow-md hover:scale-110 transition-all"></button>
+            <button className="w-10 h-10 rounded-full bg-red-500 border-4 border-transparent hover:border-purple-400 shadow-md hover:scale-110 transition-all"></button>
+            <button className="w-10 h-10 rounded-full bg-blue-500 border-4 border-transparent hover:border-purple-400 shadow-md hover:scale-110 transition-all"></button>
+            <button className="w-10 h-10 rounded-full bg-pink-400 border-4 border-transparent hover:border-purple-400 shadow-md hover:scale-110 transition-all"></button>
+          </div>
+        </div>
 
       {/* Sol Panel - Araçlar */}
       <div className="space-y-4">
