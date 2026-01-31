@@ -1,0 +1,65 @@
+name: Sync to Claude
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:  # Manuel tetikleme için
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        
+      - name: Create repository bundle
+        run: |
+          # node_modules ve .git hariç her şeyi zip'le
+          zip -r repo-bundle.zip . \
+            -x ".git/*" \
+            -x "node_modules/*" \
+            -x ".next/*" \
+            -x "*.log" \
+            -x ".env*"
+          
+          echo "✅ Bundle created: $(ls -lh repo-bundle.zip | awk '{print $5}')"
+      
+      - name: Upload to file.io (24h temporary storage)
+        id: upload
+        run: |
+          RESPONSE=$(curl -F "file=@repo-bundle.zip" https://file.io)
+          echo "$RESPONSE"
+          
+          # URL'i extract et
+          DOWNLOAD_URL=$(echo "$RESPONSE" | grep -o '"link":"[^"]*' | cut -d'"' -f4)
+          echo "download_url=$DOWNLOAD_URL" >> $GITHUB_OUTPUT
+          
+          echo ""
+          echo "════════════════════════════════════════"
+          echo "📦 REPO BUNDLE READY!"
+          echo "════════════════════════════════════════"
+          echo ""
+          echo "🔗 Download URL:"
+          echo "$DOWNLOAD_URL"
+          echo ""
+          echo "⏰ Valid for: 24 hours"
+          echo "📊 Commit: ${{ github.sha }}"
+          echo ""
+          echo "════════════════════════════════════════"
+      
+      - name: Create summary
+        run: |
+          echo "## 📦 Repository Bundle Created" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Download URL:** ${{ steps.upload.outputs.download_url }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch:** \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Valid for:** 24 hours" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Copy this URL and send it to Claude to sync the repository." >> $GITHUB_STEP_SUMMARY
