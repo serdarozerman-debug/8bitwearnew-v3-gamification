@@ -414,85 +414,11 @@ export default function CustomDesignEditor({
   const mockupImage = productImage || 'https://placehold.co/600x700/cccccc/222222?text=T-Shirt+Mockup'
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-600 via-purple-500 to-indigo-600 relative overflow-hidden p-6">
-      <div className="flex flex-col lg:flex-row gap-6 h-full">
+    <div className="flex flex-col lg:flex-row gap-6 h-full min-h-screen bg-gray-50 p-6">
       <Toaster position="top-right" />
       
-      {/* Floating Particles */}
-      <div className="fixed left-[10%] top-[20%] text-4xl opacity-40 pointer-events-none animate-float" style={{ animationDelay: '0s', animationDuration: '15s' }}>⭐</div>
-      <div className="fixed left-[85%] top-[15%] text-3xl opacity-40 pointer-events-none animate-float" style={{ animationDelay: '2s', animationDuration: '18s' }}>🍪</div>
-      <div className="fixed left-[20%] top-[70%] text-4xl opacity-40 pointer-events-none animate-float" style={{ animationDelay: '4s', animationDuration: '20s' }}>🎨</div>
-      <div className="fixed left-[75%] top-[65%] text-3xl opacity-40 pointer-events-none animate-float" style={{ animationDelay: '6s', animationDuration: '17s' }}>✨</div>
-      
-      {/* Level & XP Banner */}
-      <div className="gradient-primary text-white p-6 shadow-[0_6px_20px_rgba(102,126,234,0.4)] mb-6">
-        <div className="max-w-[1400px] mx-auto flex flex-col lg:flex-row justify-between items-center gap-4">
-          <div className="flex-1 w-full">
-            <h2 className="text-2xl font-black mb-2 flex items-center gap-2">
-              🎯 Görev: İlk Pixel Art Tasarımım
-            </h2>
-            <div className="relative h-6 bg-white/30 backdrop-blur-sm rounded-full overflow-hidden max-w-md">
-              <div 
-                className="absolute top-0 left-0 h-full gradient-secondary rounded-full animate-shimmer"
-                style={{ width: '56%' }}
-              />
-              <div className="absolute inset-0 flex items-center justify-center text-sm font-black">
-                450 / 800 XP
-              </div>
-            </div>
-          </div>
-          <div className="bubble-card px-6 py-3">
-            <div className="flex items-center gap-2">
-              <span className="text-3xl">⭐</span>
-              <span className="text-2xl font-black gradient-text">Level 5</span>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      {/* 3-Column Grid Layout */}
-      <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-[320px_1fr_320px] gap-6">
-      
-      {/* LEFT PANEL */}
-      <div className="bubble-card p-6 space-y-4">
-      
-        {/* Product Islands - 2x2 Grid */}
-        <div>
-          <h3 className="font-black text-lg mb-3">🎮 ÜRÜN SEÇ</h3>
-          <div className="grid grid-cols-2 gap-2">
-            <button className="aspect-square rounded-2xl p-3 bg-gradient-to-br from-blue-500 to-blue-600 text-white font-bold shadow-lg hover:scale-105 transition-all flex flex-col items-center justify-center gap-1">
-              <span className="text-3xl">👕</span>
-              <span className="text-xs">Tişört</span>
-            </button>
-            <button className="aspect-square rounded-2xl p-3 bg-gradient-to-br from-pink-500 to-pink-600 text-white font-bold shadow-lg hover:scale-105 transition-all flex flex-col items-center justify-center gap-1">
-              <span className="text-3xl">🧥</span>
-              <span className="text-xs">Sweatshirt</span>
-            </button>
-            <button className="aspect-square rounded-2xl p-3 bg-gradient-to-br from-cyan-400 to-cyan-500 text-white font-bold shadow-lg hover:scale-105 transition-all flex flex-col items-center justify-center gap-1">
-              <span className="text-3xl">🎒</span>
-              <span className="text-xs">Çanta</span>
-            </button>
-            <button className="aspect-square rounded-2xl p-3 bg-gradient-to-br from-green-400 to-green-500 text-white font-bold shadow-lg hover:scale-105 transition-all flex flex-col items-center justify-center gap-1">
-              <span className="text-3xl">🧢</span>
-              <span className="text-xs">Şapka</span>
-            </button>
-          </div>
-        </div>
-        
-        {/* Circular Colors */}
-        <div>
-          <h3 className="font-black text-sm mb-2">🎨 RENK</h3>
-          <div className="flex flex-wrap gap-2">
-            <button className="w-10 h-10 rounded-full bg-white border-4 border-purple-600 shadow-md hover:scale-110 transition-all"></button>
-            <button className="w-10 h-10 rounded-full bg-black border-4 border-transparent hover:border-purple-400 shadow-md hover:scale-110 transition-all"></button>
-            <button className="w-10 h-10 rounded-full bg-red-500 border-4 border-transparent hover:border-purple-400 shadow-md hover:scale-110 transition-all"></button>
-            <button className="w-10 h-10 rounded-full bg-blue-500 border-4 border-transparent hover:border-purple-400 shadow-md hover:scale-110 transition-all"></button>
-            <button className="w-10 h-10 rounded-full bg-pink-400 border-4 border-transparent hover:border-purple-400 shadow-md hover:scale-110 transition-all"></button>
-          </div>
-        </div>
-
       {/* Sol Panel - Araçlar */}
-      <div className="space-y-4">
+      <div className="w-full lg:w-80 space-y-4 shrink-0">
         {/* Görsel Yükleme */}
         <div className="bg-white rounded-xl p-4 shadow-md">
           <h3 className="font-bold text-lg mb-3 flex items-center gap-2 text-gray-900">
@@ -750,63 +676,6 @@ export default function CustomDesignEditor({
         <div className="mt-4 text-center text-sm text-gray-600">
           Toplam {elements.length} element
         </div>
-      </div>
-      </div>
-      
-      {/* CENTER PANEL - Pink Gradient + Mockup */}
-      <div className="bubble-card p-6 bg-gradient-to-br from-pink-300 via-pink-200 to-purple-200">
-        <div className="text-center mb-4">
-          <h3 className="text-2xl font-black gradient-text">✨ TASARIM ALANI ✨</h3>
-        </div>
-        
-        <div className="bg-white/50 backdrop-blur-sm rounded-3xl p-6 min-h-[600px] flex items-center justify-center">
-          <div className="text-center">
-            <div className="text-8xl mb-4">👕</div>
-            <p className="text-gray-600 font-bold">T-Shirt Mockup</p>
-          </div>
-        </div>
-      </div>
-      
-      {/* RIGHT PANEL - Quests */}
-      <div className="bubble-card p-6 space-y-6">
-        <div>
-          <h3 className="font-black text-xl mb-4">🏆 GÖREVLER</h3>
-          
-          <div className="space-y-3">
-            <div className="p-4 rounded-2xl bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg">
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">✅</span>
-                <div>
-                  <div className="font-bold">İlk Görselini Yükle</div>
-                  <div className="text-sm opacity-90">+10 XP 🎉</div>
-                </div>
-              </div>
-            </div>
-            
-            <div className="p-4 rounded-2xl bg-gradient-to-r from-pink-400 to-pink-500 text-white shadow-lg animate-pulse-custom">
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">🎨</span>
-                <div>
-                  <div className="font-bold">Tasarımını Tamamla</div>
-                  <div className="text-sm opacity-90">+25 XP 🔥</div>
-                </div>
-              </div>
-            </div>
-            
-            <div className="p-4 rounded-2xl bg-gradient-to-r from-pink-300 to-pink-400 text-white shadow-lg opacity-70">
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">🛒</span>
-                <div>
-                  <div className="font-bold">İlk Alışverişini Tamamla</div>
-                  <div className="text-sm opacity-90">+100 XP + 🏆</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      </div>
       </div>
     </div>
   )
