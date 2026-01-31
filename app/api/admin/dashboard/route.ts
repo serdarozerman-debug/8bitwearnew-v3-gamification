@@ -165,7 +165,7 @@ export async function GET(req: NextRequest) {
         completedOrders,
         totalCustomers,
         averageOrderValue: totalOrders > 0 
-          ? (totalRevenue._sum.totalAmount || 0) / totalOrders 
+          ? Number(totalRevenue._sum.totalAmount || 0) / totalOrders 
           : 0,
       },
       charts: {
