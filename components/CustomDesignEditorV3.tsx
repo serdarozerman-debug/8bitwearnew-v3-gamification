@@ -159,6 +159,12 @@ function DraggableElement({
         e.stopPropagation()
         onSelect()
       }}
+      onTouchStart={(e) => {
+        // Mobilde touch ile de seçimi aktif et (ama drag başlayacaksa müdahale etme)
+        if (e.touches.length === 1 && !isResizing) {
+          onSelect()
+        }
+      }}
     >
       {/* DELETE BUTTON - Always visible on hover or when selected */}
       <button
@@ -194,34 +200,40 @@ function DraggableElement({
             onContextMenu={(e) => e.preventDefault()} // Long-press menu'yi engelle
           />
           
-          {/* Resize Handles (sadece seçili ise göster) */}
-          {isSelected && (
+          {/* Resize Handles */}
+          {/* Desktop: Sadece seçili ise göster, Mobile: HER ZAMAN göster */}
+          {(isSelected || (typeof window !== 'undefined' && window.innerWidth < 768)) && (
             <>
               {/* Desktop: 4 köşe handle - Mobilde gizli */}
               <div className="hidden md:block">
-                {/* NW - Sol Üst */}
-                <div
-                  onMouseDown={(e) => handleResizeStart(e, 'nw')}
-                  className="absolute -top-2 -left-2 w-4 h-4 bg-white border-2 border-purple-500 rounded-full cursor-nwse-resize hover:bg-purple-500 transition"
-                  style={{ zIndex: 10 }}
-                />
-                
-                {/* NE - Sağ Üst */}
-                <div
-                  onMouseDown={(e) => handleResizeStart(e, 'ne')}
-                  className="absolute -top-2 -right-2 w-4 h-4 bg-white border-2 border-purple-500 rounded-full cursor-nesw-resize hover:bg-purple-500 transition"
-                  style={{ zIndex: 10, right: '-8px' }}
-                />
-                
-                {/* SW - Sol Alt */}
-                <div
-                  onMouseDown={(e) => handleResizeStart(e, 'sw')}
-                  className="absolute -bottom-2 -left-2 w-4 h-4 bg-white border-2 border-purple-500 rounded-full cursor-nesw-resize hover:bg-purple-500 transition"
-                  style={{ zIndex: 10, bottom: '-8px' }}
-                />
+                {isSelected && (
+                  <>
+                    {/* NW - Sol Üst */}
+                    <div
+                      onMouseDown={(e) => handleResizeStart(e, 'nw')}
+                      className="absolute -top-2 -left-2 w-4 h-4 bg-white border-2 border-purple-500 rounded-full cursor-nwse-resize hover:bg-purple-500 transition"
+                      style={{ zIndex: 10 }}
+                    />
+                    
+                    {/* NE - Sağ Üst */}
+                    <div
+                      onMouseDown={(e) => handleResizeStart(e, 'ne')}
+                      className="absolute -top-2 -right-2 w-4 h-4 bg-white border-2 border-purple-500 rounded-full cursor-nesw-resize hover:bg-purple-500 transition"
+                      style={{ zIndex: 10, right: '-8px' }}
+                    />
+                    
+                    {/* SW - Sol Alt */}
+                    <div
+                      onMouseDown={(e) => handleResizeStart(e, 'sw')}
+                      className="absolute -bottom-2 -left-2 w-4 h-4 bg-white border-2 border-purple-500 rounded-full cursor-nesw-resize hover:bg-purple-500 transition"
+                      style={{ zIndex: 10, bottom: '-8px' }}
+                    />
+                  </>
+                )}
               </div>
               
               {/* SE - Sağ Alt (HEM DESKTOP HEM MOBİL) */}
+              {/* MOBİLDE: Her zaman görünür, DESKTOP: Sadece seçili ise */}
               <div
                 onMouseDown={(e) => handleResizeStart(e, 'se')}
                 onTouchStart={(e) => handleResizeStart(e, 'se')}
@@ -500,13 +512,17 @@ export default function CustomDesignEditor({
           
           if (data.success && data.convertedImageUrl) {
             // ✅ Başarılı - AI görseli ile element oluştur
+            // MOBİLDE otomatik olarak 10px, desktop'ta 45px
+            const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
+            const initialSize = isMobile ? 10 : 45
+            
             const newElement: DesignElement = {
               id: tempId,
               type: 'image',
               position: { x: 50, y: 50 },
               imageUrl: data.convertedImageUrl,
-              imageWidth: 45,  // V2 ile aynı sabit boyut
-              imageHeight: 45, // V2 ile aynı sabit boyut
+              imageWidth: initialSize,
+              imageHeight: initialSize,
               rotation: 0,
             }
             
