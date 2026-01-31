@@ -396,11 +396,21 @@ export default function CustomDesignEditor({
 
   // 🆕 MOBİL RESİZE HANDLER
   const handleMobileResize = (direction: 'bigger' | 'smaller') => {
-    if (!selectedElement) return
+    // Seçili element yoksa ilk elementi kullan
+    const targetElement = selectedElement || (elements.length > 0 ? elements[0].id : null)
+    if (!targetElement) {
+      toast.error('Önce bir pixel art ekleyin!')
+      return
+    }
+    
+    // Seçili değilse şimdi seç
+    if (!selectedElement && targetElement) {
+      setSelectedElement(targetElement)
+    }
     
     setElements(prevElements => 
       prevElements.map(el => {
-        if (el.id !== selectedElement) return el
+        if (el.id !== targetElement) return el
         
         const delta = direction === 'bigger' ? 15 : -15
         const newWidth = Math.max(30, Math.min(300, (el.imageWidth || 45) + delta))
@@ -1222,16 +1232,29 @@ export default function CustomDesignEditor({
             </DndContext>
             
             {/* 🆕 MOBİL RESİZE BUTONLARI - Fixed Bottom */}
-            {selectedElement && (
+            {/* HER ZAMAN GÖRÜNÜR - Element varsa butonlar çıkacak */}
+            {elements.length > 0 && (
               <div className="md:hidden fixed bottom-20 left-0 right-0 z-50 flex gap-2 px-4">
                 <button
-                  onClick={() => handleMobileResize('smaller')}
+                  onClick={() => {
+                    // Seçili element yoksa ilk elementi seç
+                    if (!selectedElement && elements.length > 0) {
+                      setSelectedElement(elements[0].id)
+                    }
+                    handleMobileResize('smaller')
+                  }}
                   className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 text-white py-4 rounded-2xl font-black text-lg shadow-2xl active:scale-95 transition"
                 >
                   🔽 KÜÇÜLT
                 </button>
                 <button
-                  onClick={() => handleMobileResize('bigger')}
+                  onClick={() => {
+                    // Seçili element yoksa ilk elementi seç
+                    if (!selectedElement && elements.length > 0) {
+                      setSelectedElement(elements[0].id)
+                    }
+                    handleMobileResize('bigger')
+                  }}
                   className="flex-1 bg-gradient-to-r from-blue-500 to-purple-500 text-white py-4 rounded-2xl font-black text-lg shadow-2xl active:scale-95 transition"
                 >
                   🔼 BÜYÜT
