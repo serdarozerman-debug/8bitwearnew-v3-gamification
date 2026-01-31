@@ -269,20 +269,24 @@ CRITICAL FEATURES (must be readable): zipper line, collar, earmuff pads, eyes (2
 
     // Common helper: Replicate fallback (SDXL image-to-image)
     const tryReplicate = async (): Promise<string | null> => {
-      if (!replicateToken) {
-        console.warn('[AI Convert] Replicate token not configured, skipping replicate fallback')
-        return null
-      }
+      try {
+        if (!replicateToken) {
+          console.warn('[AI Convert] Replicate token not configured, skipping replicate fallback')
+          return null
+        }
 
-      // SDXL image-to-image model version (stability-ai/sdxl image-to-image)
-      const modelVersion =
-        process.env.REPLICATE_SDXL_VERSION ||
-        'stability-ai/sdxl:39ed52f2a78e934b3ba6e2a089f5b1c712de7dfd16655c0cd860e19fd5d7151a'
+        // SDXL image-to-image model version (stability-ai/sdxl image-to-image)
+        const modelVersion =
+          process.env.REPLICATE_SDXL_VERSION ||
+          'stability-ai/sdxl:39ed52f2a78e934b3ba6e2a089f5b1c712de7dfd16655c0cd860e19fd5d7151a'
 
-      const dataUri = `data:image/png;base64,${pngBuffer.toString('base64')}`
+        const dataUri = `data:image/png;base64,${pngBuffer.toString('base64')}`
 
-      console.log('[AI Convert] Replicate: creating prediction...')
-      const createRes = await fetch('https://api.replicate.com/v1/predictions', {
+        console.log('[AI Convert] 🔵 Replicate: Starting request...')
+        console.log('[AI Convert] 🔵 Model:', modelVersion)
+        console.log('[AI Convert] 🔵 Image size:', dataUri.length, 'bytes')
+        
+        const createRes = await fetch('https://api.replicate.com/v1/predictions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -305,8 +309,10 @@ CRITICAL FEATURES (must be readable): zipper line, collar, earmuff pads, eyes (2
       })
 
       if (!createRes.ok) {
-        const errText = await createRes.text().catch(() => '')
-        console.warn('[AI Convert] Replicate create failed:', createRes.status, errText)
+        const errText = await createRes.text().catch(() => 'Could not read error')
+        console.error('[AI Convert] ❌ Replicate create failed!')
+        console.error('[AI Convert] ❌ Status:', createRes.status, createRes.statusText)
+        console.error('[AI Convert] ❌ Response:', errText.substring(0, 500))
         return null
       }
 
@@ -331,23 +337,36 @@ CRITICAL FEATURES (must be readable): zipper line, collar, earmuff pads, eyes (2
           return null
         }
         const pollJson: any = await pollRes.json()
+        console.log(`[AI Convert] 🔵 Poll attempt ${i + 1}/${maxAttempts}, status: ${pollJson?.status}`)
+        
         if (pollJson?.status === 'succeeded') {
           const out = pollJson.output?.[0]
           if (out) {
-            console.log('[AI Convert] Replicate success')
+            console.log('[AI Convert] ✅ Replicate SUCCESS! Output URL:', out.substring(0, 80) + '...')
             return out as string
           }
+          console.warn('[AI Convert] ⚠️ Replicate succeeded but no output URL')
           return null
         }
         if (pollJson?.status === 'failed' || pollJson?.status === 'canceled') {
-          console.warn('[AI Convert] Replicate failed status:', pollJson?.status)
+          console.error('[AI Convert] ❌ Replicate failed status:', pollJson?.status)
+          console.error('[AI Convert] ❌ Error details:', pollJson?.error || 'No error message')
           return null
         }
         await delay(1500)
       }
 
-      console.warn('[AI Convert] Replicate timed out')
+      console.warn('[AI Convert] ⚠️ Replicate timed out after', maxAttempts, 'attempts')
       return null
+    } catch (replicateError: any) {
+      console.error('[AI Convert] ❌ Replicate exception:', replicateError)
+      console.error('[AI Convert] ❌ Error details:', {
+        message: replicateError.message,
+        name: replicateError.name,
+        stack: replicateError.stack?.substring(0, 200)
+      })
+      return null
+    }
     }
 
     // 1) If requested, try Replicate first
