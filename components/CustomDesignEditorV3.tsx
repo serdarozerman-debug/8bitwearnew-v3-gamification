@@ -4,8 +4,9 @@ import { useState, useRef, useEffect } from 'react'
 import { DndContext, DragEndEvent, DragStartEvent, useDraggable, PointerSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
 import { HexColorPicker } from 'react-colorful'
-import { Upload, Type, Image as ImageIcon, Trash2, ZoomIn, ZoomOut, RotateCw, Save } from 'lucide-react'
+import { Upload, Type, Image as ImageIcon, Trash2, ZoomIn, ZoomOut, RotateCw, Save, Share2 } from 'lucide-react'
 import { toast, Toaster } from 'sonner'
+import html2canvas from 'html2canvas'
 import { 
   PRODUCT_CONFIGS, 
   ProductType, 
@@ -185,8 +186,12 @@ function DraggableElement({
               objectFit: 'contain',
               transform: element.rotation ? `rotate(${element.rotation}deg)` : undefined,
               pointerEvents: 'none',
+              WebkitTouchCallout: 'none', // iOS context menu'yi engelle
+              WebkitUserSelect: 'none',
+              userSelect: 'none',
             }}
             draggable={false}
+            onContextMenu={(e) => e.preventDefault()} // Long-press menu'yi engelle
           />
           
           {/* Resize Handles (sadece seçili ise göster) */}
@@ -220,11 +225,16 @@ function DraggableElement({
               <div
                 onMouseDown={(e) => handleResizeStart(e, 'se')}
                 onTouchStart={(e) => handleResizeStart(e, 'se')}
-                className="absolute -bottom-2 -right-2 w-8 h-8 md:w-4 md:h-4 bg-gradient-to-br from-purple-500 to-pink-500 border-2 border-white rounded-full shadow-lg cursor-nwse-resize hover:scale-110 transition-all"
-                style={{ zIndex: 10, right: '-12px', bottom: '-12px' }}
+                className="absolute -bottom-2 -right-2 w-10 h-10 md:w-4 md:h-4 bg-gradient-to-br from-purple-500 to-pink-500 border-2 border-white rounded-full shadow-lg cursor-nwse-resize hover:scale-110 transition-all active:scale-125"
+                style={{ 
+                  zIndex: 50, 
+                  right: '-16px', 
+                  bottom: '-16px',
+                  touchAction: 'none', // iOS'ta smooth touch
+                }}
               >
                 {/* Mobilde resize ikonu */}
-                <div className="md:hidden absolute inset-0 flex items-center justify-center text-white text-xs font-bold">
+                <div className="md:hidden absolute inset-0 flex items-center justify-center text-white text-base font-bold pointer-events-none">
                   ⤢
                 </div>
               </div>
@@ -359,6 +369,87 @@ export default function CustomDesignEditor({
       return el
     }))
   }
+
+  // Save & Share design
+  const handleSaveDesign = async () => {
+    if (!canvasRef.current) {
+      toast.error('Canvas bulunamadı!')
+      return
+    }
+
+    if (elements.length === 0) {
+      toast.error('Önce bir tasarım oluştur!')
+      return
+    }
+
+    setIsSaving(true)
+    const loadingToast = toast.loading('✨ Tasarımın kaydediliyor...')
+
+    try {
+      // 1. Canvas'ı PNG'ye çevir (html2canvas)
+      const canvas = await html2canvas(canvasRef.current, {
+        backgroundColor: '#f9fafb',
+        scale: 2, // Yüksek kalite
+        logging: false,
+        useCORS: true,
+      })
+
+      const previewImageBase64 = canvas.toDataURL('image/png')
+
+      // 2. API'ye kaydet
+      const response = await fetch('/api/designs/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          productType: selectedProductType,
+          productColor: selectedColor,
+          productAngle: selectedAngle,
+          mockupImage: mockupImage,
+          previewImageBase64,
+          designElements: elements,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Kaydetme başarısız')
+      }
+
+      // 3. Success! URL'i sakla
+      setShareUrl(data.shareUrl)
+      
+      toast.dismiss(loadingToast)
+      toast.success(
+        <div className="flex flex-col gap-2">
+          <div className="font-bold">🎉 Tasarımın kaydedildi!</div>
+          <div className="text-sm">Paylaşım linkine tıkla → otomatik kopyalanır</div>
+        </div>,
+        { duration: 5000 }
+      )
+
+    } catch (error: any) {
+      console.error('Save design error:', error)
+      toast.dismiss(loadingToast)
+      toast.error(error.message || 'Kaydetme sırasında hata oluştu')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // Copy share URL to clipboard
+  const handleCopyShareUrl = async () => {
+    if (!shareUrl) return
+
+    try {
+      await navigator.clipboard.writeText(shareUrl)
+      toast.success('📋 Link kopyalandı!', { duration: 2000 })
+    } catch (error) {
+      console.error('Copy error:', error)
+      toast.error('Link kopyalanamadı')
+    }
+  }
+
 
   // Görsel yükleme ve OpenAI conversion
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -587,6 +678,13 @@ export default function CustomDesignEditor({
   
   // First pixel art added flag
   const [firstPixelArtAdded, setFirstPixelArtAdded] = useState(false)
+  
+  // Save & Share states
+  const [shareUrl, setShareUrl] = useState<string | null>(null)
+  const [isSaving, setIsSaving] = useState(false)
+  
+  // Refs
+  const canvasRef = useRef<HTMLDivElement>(null)
   
   const currentProduct = selectedProductType ? PRODUCT_CONFIGS[selectedProductType] : null
   const availableAngles = currentProduct?.angles || []
@@ -957,6 +1055,33 @@ export default function CustomDesignEditor({
                   Metin Ekle
                 </button>
               </div>
+
+              {/* SAVE & SHARE DESIGN */}
+              {elements.length > 0 && (
+                <div className="bg-gradient-to-br from-green-200 to-emerald-300 rounded-2xl p-4 shadow-md animate-bounce-slow">
+                  <h4 className="font-bold text-base mb-2 flex items-center gap-2 text-green-900">
+                    <Save className="w-5 h-5" />
+                    Tasarımı Kaydet & Paylaş
+                  </h4>
+                  <button
+                    onClick={handleSaveDesign}
+                    disabled={isSaving}
+                    className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 rounded-xl hover:shadow-lg transition font-black text-sm disabled:opacity-50 mb-2"
+                  >
+                    {isSaving ? '💾 Kaydediliyor...' : '💾 Her Tasarımı Kaydet'}
+                  </button>
+                  
+                  {shareUrl && (
+                    <button
+                      onClick={handleCopyShareUrl}
+                      className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white py-2 rounded-xl hover:shadow-lg transition font-bold text-xs flex items-center justify-center gap-2"
+                    >
+                      <Share2 className="w-4 h-4" />
+                      📋 Paylaş (Linki Kopyala)
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -974,6 +1099,7 @@ export default function CustomDesignEditor({
               onDragEnd={handleDragEnd}
             >
               <div 
+                ref={canvasRef}
                 className="relative mx-auto bg-gray-50 rounded-xl overflow-hidden shadow-inner"
                 style={{ 
                   width: '500px', 
@@ -992,8 +1118,16 @@ export default function CustomDesignEditor({
                 <img
                   src={mockupImage}
                   alt="Product mockup"
-                  className="absolute inset-0 w-full h-full object-contain pointer-events-auto select-none cursor-pointer"
+                  className="absolute inset-0 w-full h-full object-contain select-none"
+                  style={{
+                    pointerEvents: 'none', // Tüm pointer eventleri engelle
+                    WebkitTouchCallout: 'none', // iOS long-press menu
+                    WebkitUserSelect: 'none',
+                    userSelect: 'none',
+                    touchAction: 'none',
+                  }}
                   draggable={false}
+                  onContextMenu={(e) => e.preventDefault()}
                   onClick={() => setSelectedElement(null)}
                 />
 

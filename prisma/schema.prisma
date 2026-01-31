@@ -352,3 +352,31 @@ enum TicketPriority {
   HIGH
   URGENT
 }
+
+// Kaydedilmiş Tasarımlar (Paylaşım için)
+model SavedDesign {
+  id              String    @id @default(cuid())
+  shareCode       String    @unique // Kısa paylaşım kodu (örn: ABC123)
+  
+  // Tasarım detayları
+  productType     String
+  productColor    String
+  productAngle    String
+  mockupImage     String
+  previewImage    String    // PNG screenshot
+  
+  // Element data (JSON)
+  designElements  Json      // Array of design elements
+  
+  // İstatistikler
+  viewCount       Int       @default(0)
+  sharedCount     Int       @default(0)
+  
+  // Metadata
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  expiresAt       DateTime? // Optional: Auto-delete after X days
+  
+  @@map("saved_designs")
+  @@index([shareCode])
+}
