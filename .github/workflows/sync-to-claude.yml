@@ -25,14 +25,15 @@ jobs:
           
           echo "✅ Bundle created: $(ls -lh repo-bundle.zip | awk '{print $5}')"
       
-      - name: Upload to file.io (24h temporary storage)
+      - name: Upload to transfer.sh (14 days storage)
         id: upload
         run: |
-          RESPONSE=$(curl -F "file=@repo-bundle.zip" https://file.io)
-          echo "$RESPONSE"
+          echo "📤 Uploading to transfer.sh..."
+          RESPONSE=$(curl --upload-file repo-bundle.zip https://transfer.sh/repo-bundle.zip)
+          echo "Response: $RESPONSE"
           
-          # URL'i extract et
-          DOWNLOAD_URL=$(echo "$RESPONSE" | grep -o '"link":"[^"]*' | cut -d'"' -f4)
+          # transfer.sh direkt URL döndürür
+          DOWNLOAD_URL="$RESPONSE"
           echo "download_url=$DOWNLOAD_URL" >> $GITHUB_OUTPUT
           
           echo ""
@@ -43,8 +44,9 @@ jobs:
           echo "🔗 Download URL:"
           echo "$DOWNLOAD_URL"
           echo ""
-          echo "⏰ Valid for: 24 hours"
+          echo "⏰ Valid for: 14 days"
           echo "📊 Commit: ${{ github.sha }}"
+          echo "🌐 Service: transfer.sh"
           echo ""
           echo "════════════════════════════════════════"
       
@@ -58,7 +60,9 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Branch:** \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Valid for:** 24 hours" >> $GITHUB_STEP_SUMMARY
+          echo "**Valid for:** 14 days" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Service:** transfer.sh (more reliable than file.io)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "---" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
