@@ -1,4 +1,5 @@
 'use client'
+// Version: 1.2.1 - Mobile UX fixes + Share link display + Samsung drag support
 
 import { useState, useRef, useEffect } from 'react'
 import { DndContext, DragEndEvent, DragStartEvent, useDraggable, PointerSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core'
@@ -332,7 +333,7 @@ export default function CustomDesignEditor({
   const [fontWeight, setFontWeight] = useState<'normal' | 'bold'>('normal')
   const [fontStyle, setFontStyle] = useState<'normal' | 'italic'>('normal')
 
-  // DnD Kit sensors with touch support
+  // DnD Kit sensors with touch support - Samsung uyumlu ayarlar
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -341,8 +342,8 @@ export default function CustomDesignEditor({
     }),
     useSensor(TouchSensor, {
       activationConstraint: {
-        delay: 100, // 100ms basılı tutulunca drag başlasın (scroll'u engellemeden önce)
-        tolerance: 5,
+        delay: 50, // Samsung için daha kısa delay (100ms → 50ms)
+        tolerance: 8, // Daha toleranslı (5px → 8px)
       },
     })
   )
@@ -512,9 +513,9 @@ export default function CustomDesignEditor({
           
           if (data.success && data.convertedImageUrl) {
             // ✅ Başarılı - AI görseli ile element oluştur
-            // MOBİLDE otomatik olarak 10px, desktop'ta 45px
+            // MOBİLDE otomatik olarak 80px (görünür boyut), desktop'ta 45px
             const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
-            const initialSize = isMobile ? 10 : 45
+            const initialSize = isMobile ? 80 : 45
             
             const newElement: DesignElement = {
               id: tempId,
@@ -1088,13 +1089,30 @@ export default function CustomDesignEditor({
                   </button>
                   
                   {shareUrl && (
-                    <button
-                      onClick={handleCopyShareUrl}
-                      className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white py-2 rounded-xl hover:shadow-lg transition font-bold text-xs flex items-center justify-center gap-2"
-                    >
-                      <Share2 className="w-4 h-4" />
-                      📋 Paylaş (Linki Kopyala)
-                    </button>
+                    <div className="space-y-2">
+                      {/* Paylaşım Linki - Tıklanabilir */}
+                      <div 
+                        onClick={handleCopyShareUrl}
+                        className="bg-white/50 backdrop-blur-sm rounded-xl p-3 cursor-pointer hover:bg-white/70 transition border-2 border-blue-300"
+                      >
+                        <p className="text-xs font-bold text-blue-900 mb-1">✨ Paylaşım Linki:</p>
+                        <p className="text-xs text-blue-700 font-mono break-all leading-tight">
+                          {shareUrl}
+                        </p>
+                        <p className="text-[10px] text-blue-600 mt-1 font-bold">
+                          👆 Tıkla → Otomatik Kopyalanır!
+                        </p>
+                      </div>
+                      
+                      {/* Paylaş Butonu */}
+                      <button
+                        onClick={handleCopyShareUrl}
+                        className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white py-2 rounded-xl hover:shadow-lg transition font-bold text-xs flex items-center justify-center gap-2"
+                      >
+                        <Share2 className="w-4 h-4" />
+                        📋 Linki Kopyala
+                      </button>
+                    </div>
                   )}
                 </div>
               )}
