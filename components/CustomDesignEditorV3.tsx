@@ -89,8 +89,8 @@ function DraggableElement({
     setResizeStart({
       x: e.clientX,
       y: e.clientY,
-      width: element.imageWidth || 200,
-      height: element.imageHeight || 200,
+      width: element.imageWidth || 45,  // V2 ile aynı default
+      height: element.imageHeight || 45, // V2 ile aynı default
     })
     
     const handleMouseMove = (moveEvent: MouseEvent) => {
@@ -357,8 +357,8 @@ export default function CustomDesignEditor({
               type: 'image',
               position: { x: 50, y: 50 },
               imageUrl: data.convertedImageUrl,
-              imageWidth: 200,
-              imageHeight: 200,
+              imageWidth: 45,  // V2 ile aynı sabit boyut
+              imageHeight: 45, // V2 ile aynı sabit boyut
               rotation: 0,
             }
             
@@ -461,8 +461,8 @@ export default function CustomDesignEditor({
       if (el.id === id && el.type === 'image') {
         return {
           ...el,
-          imageWidth: (el.imageWidth || 150) * scale,
-          imageHeight: (el.imageHeight || 150) * scale,
+          imageWidth: (el.imageWidth || 45) * scale,  // V2 ile aynı default
+          imageHeight: (el.imageHeight || 45) * scale, // V2 ile aynı default
         }
       }
       return el
