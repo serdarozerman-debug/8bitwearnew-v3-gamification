@@ -450,8 +450,14 @@ export default function CustomDesignEditor({
         </div>
       </div>
       
+      {/* 3-Column Grid Layout */}
+      <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-[320px_1fr_320px] gap-6">
+      
+      {/* LEFT PANEL */}
+      <div className="bubble-card p-6 space-y-4">
+
       {/* Sol Panel - Araçlar */}
-      <div className="w-full lg:w-80 space-y-4 shrink-0">
+      <div className="space-y-4">
         {/* Görsel Yükleme */}
         <div className="bg-white rounded-xl p-4 shadow-md">
           <h3 className="font-bold text-lg mb-3 flex items-center gap-2 text-gray-900">
@@ -709,6 +715,62 @@ export default function CustomDesignEditor({
         <div className="mt-4 text-center text-sm text-gray-600">
           Toplam {elements.length} element
         </div>
+      </div>
+      </div>
+      
+      {/* CENTER PANEL - Pink Gradient + Mockup */}
+      <div className="bubble-card p-6 bg-gradient-to-br from-pink-300 via-pink-200 to-purple-200">
+        <div className="text-center mb-4">
+          <h3 className="text-2xl font-black gradient-text">✨ TASARIM ALANI ✨</h3>
+        </div>
+        
+        <div className="bg-white/50 backdrop-blur-sm rounded-3xl p-6 min-h-[600px] flex items-center justify-center">
+          <div className="text-center">
+            <div className="text-8xl mb-4">👕</div>
+            <p className="text-gray-600 font-bold">T-Shirt Mockup</p>
+          </div>
+        </div>
+      </div>
+      
+      {/* RIGHT PANEL - Quests */}
+      <div className="bubble-card p-6 space-y-6">
+        <div>
+          <h3 className="font-black text-xl mb-4">🏆 GÖREVLER</h3>
+          
+          <div className="space-y-3">
+            <div className="p-4 rounded-2xl bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">✅</span>
+                <div>
+                  <div className="font-bold">İlk Görselini Yükle</div>
+                  <div className="text-sm opacity-90">+10 XP 🎉</div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="p-4 rounded-2xl bg-gradient-to-r from-pink-400 to-pink-500 text-white shadow-lg animate-pulse-custom">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">🎨</span>
+                <div>
+                  <div className="font-bold">Tasarımını Tamamla</div>
+                  <div className="text-sm opacity-90">+25 XP 🔥</div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="p-4 rounded-2xl bg-gradient-to-r from-pink-300 to-pink-400 text-white shadow-lg opacity-70">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">🛒</span>
+                <div>
+                  <div className="font-bold">İlk Alışverişini Tamamla</div>
+                  <div className="text-sm opacity-90">+100 XP + 🏆</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
       </div>
       </div>
     </div>
