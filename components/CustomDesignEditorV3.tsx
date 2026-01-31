@@ -1,11 +1,11 @@
 'use client'
-// Version: 1.2.1 - Mobile UX fixes + Share link display + Samsung drag support
+// Version: 1.3.0 - Native touch events + button resize for mobile
 
 import { useState, useRef, useEffect } from 'react'
 import { DndContext, DragEndEvent, DragStartEvent, useDraggable, PointerSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
 import { HexColorPicker } from 'react-colorful'
-import { Upload, Type, Image as ImageIcon, Trash2, ZoomIn, ZoomOut, RotateCw, Save, Share2 } from 'lucide-react'
+import { Upload, Type, Image as ImageIcon, Trash2, ZoomIn, ZoomOut, RotateCw, Save, Share2, ChevronUp, ChevronDown } from 'lucide-react'
 import { toast, Toaster } from 'sonner'
 import html2canvas from 'html2canvas'
 import { 
@@ -17,6 +17,14 @@ import {
   COLOR_LABELS,
   COLOR_HEX
 } from '@/lib/product-config'
+
+// Mobile detection utility
+const isMobile = () => {
+  if (typeof window === 'undefined') return false
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+    navigator.userAgent
+  ) || window.innerWidth < 768
+}
 
 // Add loading bar animation CSS
 if (typeof document !== 'undefined') {
@@ -155,15 +163,18 @@ function DraggableElement({
       style={style}
       {...(isResizing ? {} : listeners)}  // Resize sırasında drag'i devre dışı bırak
       {...(isResizing ? {} : attributes)}
-      className={`relative ${isSelected ? 'ring-2 ring-purple-500 rounded' : ''}`}
+      className={`relative ${isSelected ? 'ring-4 ring-purple-600 ring-offset-2 rounded-lg shadow-lg' : ''}`}
       onClick={(e) => {
         e.stopPropagation()
         onSelect()
       }}
       onTouchStart={(e) => {
-        // Mobilde touch ile de seçimi aktif et (ama drag başlayacaksa müdahale etme)
+        e.stopPropagation()
         if (e.touches.length === 1 && !isResizing) {
           onSelect()
+          if (typeof window !== 'undefined' && 'vibrate' in navigator) {
+            navigator.vibrate(20)
+          }
         }
       }}
     >
@@ -381,6 +392,36 @@ export default function CustomDesignEditor({
       }
       return el
     }))
+  }
+
+  // 🆕 MOBİL RESİZE HANDLER
+  const handleMobileResize = (direction: 'bigger' | 'smaller') => {
+    if (!selectedElement) return
+    
+    setElements(prevElements => 
+      prevElements.map(el => {
+        if (el.id !== selectedElement) return el
+        
+        const delta = direction === 'bigger' ? 15 : -15
+        const newWidth = Math.max(30, Math.min(300, (el.imageWidth || 45) + delta))
+        const newHeight = Math.max(30, Math.min(300, (el.imageHeight || 45) + delta))
+        
+        return {
+          ...el,
+          imageWidth: newWidth,
+          imageHeight: newHeight,
+        }
+      })
+    )
+    
+    if (typeof window !== 'undefined' && 'vibrate' in navigator) {
+      navigator.vibrate(10)
+    }
+    
+    toast.success(direction === 'bigger' ? '🔼 Büyütüldü!' : '🔽 Küçültüldü!', { 
+      duration: 1000,
+      position: 'bottom-center'
+    })
   }
 
   // Save & Share design
@@ -1139,7 +1180,7 @@ export default function CustomDesignEditor({
                   width: '500px', 
                   height: '600px',
                   maxWidth: '100%',
-                  maxHeight: window.innerWidth < 768 ? '500px' : '600px', // Mobilde 500px fixed
+                  maxHeight: typeof window !== 'undefined' && window.innerWidth < 768 ? '500px' : '600px', // Mobilde 500px fixed
                   touchAction: isDraggingElement ? 'none' : 'auto', // Mobilde scroll lock
                 }}
                 onClick={(e) => {
@@ -1179,6 +1220,24 @@ export default function CustomDesignEditor({
                 ))}
               </div>
             </DndContext>
+            
+            {/* 🆕 MOBİL RESİZE BUTONLARI - Fixed Bottom */}
+            {selectedElement && (
+              <div className="md:hidden fixed bottom-20 left-0 right-0 z-50 flex gap-2 px-4">
+                <button
+                  onClick={() => handleMobileResize('smaller')}
+                  className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 text-white py-4 rounded-2xl font-black text-lg shadow-2xl active:scale-95 transition"
+                >
+                  🔽 KÜÇÜLT
+                </button>
+                <button
+                  onClick={() => handleMobileResize('bigger')}
+                  className="flex-1 bg-gradient-to-r from-blue-500 to-purple-500 text-white py-4 rounded-2xl font-black text-lg shadow-2xl active:scale-95 transition"
+                >
+                  🔼 BÜYÜT
+                </button>
+              </div>
+            )}
             
             <div className="mt-3 text-center text-sm text-gray-600 font-medium">
               {!isStepUnlocked('tools') ? (
