@@ -414,7 +414,7 @@ export default function CustomDesignEditor({
   const mockupImage = productImage || 'https://placehold.co/600x700/cccccc/222222?text=T-Shirt+Mockup'
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6 h-full min-h-screen bg-gray-50 p-6">
+    <div className="flex flex-col lg:flex-row gap-6 h-full min-h-screen bg-gradient-to-br from-purple-600 via-purple-500 to-indigo-600 p-6">
       <Toaster position="top-right" />
       
       {/* Sol Panel - Araçlar */}
@@ -512,7 +512,7 @@ export default function CustomDesignEditor({
               />
             </div>
             {showColorPicker && (
-              <div className="mt-3 p-2 bg-gray-50 rounded-lg">
+              <div className="mt-3 p-2 bg-gradient-to-br from-purple-600 via-purple-500 to-indigo-600 rounded-lg">
                 <HexColorPicker color={textColor} onChange={setTextColor} />
                 <button
                   onClick={() => setShowColorPicker(false)}
