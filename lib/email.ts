@@ -1,6 +1,8 @@
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+// Resend is optional - only initialize if key is provided
+const resendKey = process.env.RESEND_API_KEY || ''
+const resend = resendKey ? new Resend(resendKey) : null
 
 export interface OrderEmailData {
   orderNumber: string
@@ -26,6 +28,11 @@ export interface OrderEmailData {
 }
 
 export async function sendSupplierEmail(data: OrderEmailData) {
+  if (!resend) {
+    console.warn('Resend not configured, skipping supplier email')
+    return { success: false, error: 'Email service not configured' }
+  }
+  
   const itemsHtml = data.items.map((item, index) => `
     <div style="margin-bottom: 20px; padding: 15px; background: #f9f9f9; border-radius: 8px;">
       <h3 style="margin: 0 0 10px 0; color: #333;">Ürün ${index + 1}</h3>
@@ -105,6 +112,11 @@ export async function sendOrderConfirmationEmail(
   orderNumber: string,
   totalAmount: string
 ) {
+  if (!resend) {
+    console.warn('Resend not configured, skipping order confirmation email')
+    return { success: false, error: 'Email service not configured' }
+  }
+  
   const html = `
     <!DOCTYPE html>
     <html>
@@ -168,6 +180,11 @@ export async function sendShippingNotificationEmail(
   trackingNumber: string,
   trackingUrl: string
 ) {
+  if (!resend) {
+    console.warn('Resend not configured, skipping shipping notification email')
+    return { success: false, error: 'Email service not configured' }
+  }
+  
   const html = `
     <!DOCTYPE html>
     <html>
