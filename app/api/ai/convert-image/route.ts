@@ -265,7 +265,7 @@ CRITICAL FEATURES (must be readable): zipper line, collar, earmuff pads, eyes (2
 
     const preferReplicate = provider === 'replicate'
     let convertedImageUrl: string | null = null
-    let providerUsed: 'openai-edit' | 'replicate' | '' = ''
+    let providerUsed: 'openai-edit' | 'replicate' | 'fallback-direct' | '' = ''
 
     // Common helper: Replicate fallback (SDXL image-to-image)
     const tryReplicate = async (): Promise<string | null> => {

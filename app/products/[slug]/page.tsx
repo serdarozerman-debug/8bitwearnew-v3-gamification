@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
-import CustomDesignEditor from '@/components/CustomDesignEditor'
+import CustomDesignEditor from '@/components/CustomDesignEditorV3'
 import { formatPrice } from '@/lib/utils'
 import { toast } from 'sonner'
 
