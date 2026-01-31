@@ -414,8 +414,41 @@ export default function CustomDesignEditor({
   const mockupImage = productImage || 'https://placehold.co/600x700/cccccc/222222?text=T-Shirt+Mockup'
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6 h-full min-h-screen bg-gradient-to-br from-purple-600 via-purple-500 to-indigo-600 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-purple-600 via-purple-500 to-indigo-600 relative overflow-hidden p-6">
+      <div className="flex flex-col lg:flex-row gap-6 h-full">
       <Toaster position="top-right" />
+      
+      {/* Floating Particles */}
+      <div className="fixed left-[10%] top-[20%] text-4xl opacity-40 pointer-events-none animate-float" style={{ animationDelay: '0s', animationDuration: '15s' }}>⭐</div>
+      <div className="fixed left-[85%] top-[15%] text-3xl opacity-40 pointer-events-none animate-float" style={{ animationDelay: '2s', animationDuration: '18s' }}>🍪</div>
+      <div className="fixed left-[20%] top-[70%] text-4xl opacity-40 pointer-events-none animate-float" style={{ animationDelay: '4s', animationDuration: '20s' }}>🎨</div>
+      <div className="fixed left-[75%] top-[65%] text-3xl opacity-40 pointer-events-none animate-float" style={{ animationDelay: '6s', animationDuration: '17s' }}>✨</div>
+      
+      {/* Level & XP Banner */}
+      <div className="gradient-primary text-white p-6 shadow-[0_6px_20px_rgba(102,126,234,0.4)] mb-6">
+        <div className="max-w-[1400px] mx-auto flex flex-col lg:flex-row justify-between items-center gap-4">
+          <div className="flex-1 w-full">
+            <h2 className="text-2xl font-black mb-2 flex items-center gap-2">
+              🎯 Görev: İlk Pixel Art Tasarımım
+            </h2>
+            <div className="relative h-6 bg-white/30 backdrop-blur-sm rounded-full overflow-hidden max-w-md">
+              <div 
+                className="absolute top-0 left-0 h-full gradient-secondary rounded-full animate-shimmer"
+                style={{ width: '56%' }}
+              />
+              <div className="absolute inset-0 flex items-center justify-center text-sm font-black">
+                450 / 800 XP
+              </div>
+            </div>
+          </div>
+          <div className="bubble-card px-6 py-3">
+            <div className="flex items-center gap-2">
+              <span className="text-3xl">⭐</span>
+              <span className="text-2xl font-black gradient-text">Level 5</span>
+            </div>
+          </div>
+        </div>
+      </div>
       
       {/* Sol Panel - Araçlar */}
       <div className="w-full lg:w-80 space-y-4 shrink-0">
@@ -512,7 +545,7 @@ export default function CustomDesignEditor({
               />
             </div>
             {showColorPicker && (
-              <div className="mt-3 p-2 bg-gradient-to-br from-purple-600 via-purple-500 to-indigo-600 rounded-lg">
+              <div className="mt-3 p-2 bg-gray-50 rounded-lg">
                 <HexColorPicker color={textColor} onChange={setTextColor} />
                 <button
                   onClick={() => setShowColorPicker(false)}
@@ -676,6 +709,7 @@ export default function CustomDesignEditor({
         <div className="mt-4 text-center text-sm text-gray-600">
           Toplam {elements.length} element
         </div>
+      </div>
       </div>
     </div>
   )
