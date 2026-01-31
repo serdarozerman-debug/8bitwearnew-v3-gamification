@@ -552,6 +552,7 @@ export default function CustomDesignEditor({
             body: JSON.stringify({
               imageUrl,
               prompt: 'Use uploaded photo as reference. Keep silhouette and pose. Single character. 64x64 pixel-art sprite, flat solid colors only, one color per area, black outlines, max 16 colors, hair one rounded blob, transparent background, no shading/highlights/gradients/texture.',
+              provider: 'replicate', // 🚀 FORCE Replicate: 10x daha hızlı!
             }),
           })
 
