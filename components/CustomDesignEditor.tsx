@@ -414,11 +414,72 @@ export default function CustomDesignEditor({
   const mockupImage = productImage || 'https://placehold.co/600x700/cccccc/222222?text=T-Shirt+Mockup'
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6 h-full min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-purple-600 via-purple-500 to-indigo-600 relative overflow-hidden">
       <Toaster position="top-right" />
       
-      {/* Sol Panel - Araçlar */}
-      <div className="w-full lg:w-80 space-y-4 shrink-0">
+      {/* Floating Particles */}
+      <div className="fixed left-[10%] top-[20%] text-4xl opacity-40 pointer-events-none animate-float" style={{ animationDelay: '0s', animationDuration: '15s' }}>⭐</div>
+      <div className="fixed left-[85%] top-[15%] text-3xl opacity-40 pointer-events-none animate-float" style={{ animationDelay: '2s', animationDuration: '18s' }}>🍪</div>
+      <div className="fixed left-[20%] top-[70%] text-4xl opacity-40 pointer-events-none animate-float" style={{ animationDelay: '4s', animationDuration: '20s' }}>🎨</div>
+      <div className="fixed left-[75%] top-[65%] text-3xl opacity-40 pointer-events-none animate-float" style={{ animationDelay: '6s', animationDuration: '17s' }}>✨</div>
+      
+      {/* Quest Header Banner */}
+      <div className="gradient-primary text-white p-6 shadow-[0_6px_20px_rgba(102,126,234,0.4)]">
+        <div className="max-w-[1400px] mx-auto flex justify-between items-center">
+          <div className="flex-1">
+            <h2 className="text-2xl font-black mb-2 flex items-center gap-2">
+              🎯 Görev: İlk Pixel Art Tasarımım
+            </h2>
+            <div className="relative h-6 bg-white/30 backdrop-blur-sm rounded-full overflow-hidden max-w-md">
+              <div 
+                className="absolute top-0 left-0 h-full gradient-secondary rounded-full animate-shimmer"
+                style={{ width: '56.25%' }}
+              />
+              <div className="absolute inset-0 flex items-center justify-center text-sm font-black">
+                450 / 800 XP
+              </div>
+            </div>
+          </div>
+          <div className="bubble-card px-6 py-3">
+            <div className="flex items-center gap-2">
+              <span className="text-3xl">⭐</span>
+              <span className="text-2xl font-black gradient-text">Level 5</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content - 3 Column Grid */}
+      <div className="max-w-[1400px] mx-auto p-6 grid grid-cols-1 lg:grid-cols-[350px_1fr_350px] gap-6">
+        
+        {/* LEFT PANEL - Product Selection */}
+        <div className="bubble-card p-6">
+          <h3 className="font-black text-xl mb-4 flex items-center gap-2">
+            🎮 ÜRÜN SEÇ
+          </h3>
+          
+          {/* Product Islands - 2x2 Grid */}
+          <div className="grid grid-cols-2 gap-3 mb-6">
+            <button className="aspect-square rounded-3xl p-4 bg-gradient-to-br from-blue-500 to-blue-600 text-white font-bold shadow-xl hover:scale-105 transition-all flex flex-col items-center justify-center gap-2">
+              <span className="text-4xl">👕</span>
+              <span>Tişört</span>
+            </button>
+            <button className="aspect-square rounded-3xl p-4 bg-gradient-to-br from-pink-500 to-pink-600 text-white font-bold shadow-xl hover:scale-105 transition-all flex flex-col items-center justify-center gap-2">
+              <span className="text-4xl">🧥</span>
+              <span>Sweatshirt</span>
+            </button>
+            <button className="aspect-square rounded-3xl p-4 bg-gradient-to-br from-cyan-400 to-cyan-500 text-white font-bold shadow-xl hover:scale-105 transition-all flex flex-col items-center justify-center gap-2">
+              <span className="text-4xl">🎒</span>
+              <span>Çanta</span>
+            </button>
+            <button className="aspect-square rounded-3xl p-4 bg-gradient-to-br from-green-400 to-green-500 text-white font-bold shadow-xl hover:scale-105 transition-all flex flex-col items-center justify-center gap-2">
+              <span className="text-4xl">🧢</span>
+              <span>Şapka</span>
+            </button>
+          </div>
+
+          {/* OLD CONTENT - Keep for now */}
+          <div className="space-y-4">
         {/* Görsel Yükleme */}
         <div className="bg-white rounded-xl p-4 shadow-md">
           <h3 className="font-bold text-lg mb-3 flex items-center gap-2 text-gray-900">
@@ -633,48 +694,107 @@ export default function CustomDesignEditor({
         </button>
       </div>
 
-      {/* Merkez - Canvas */}
-      <div className="flex-1 bg-white rounded-xl shadow-lg p-8 relative overflow-hidden">
-        <h2 className="text-2xl font-bold mb-4 text-center text-gray-900">{productName}</h2>
-        
-        {/* Canvas Area - DndContext ile onDragEnd eklendi */}
-        <DndContext onDragEnd={handleDragEnd}>
-          <div 
-            className="relative mx-auto bg-gray-100 rounded-lg overflow-hidden border-2 border-gray-300"
-            style={{ 
-              width: '600px', 
-              height: '700px',
-              backgroundColor: '#f8fafc',
-            }}
-          >
-            {/* Base T-shirt Mockup (her zaman görünür) */}
-            <img
-              src={mockupImage}
-              alt="T-shirt mockup"
-              className="absolute inset-0 w-full h-full object-contain pointer-events-none select-none drop-shadow-md"
-              draggable={false}
-            />
-
-            {/* Design Elements */}
-            {elements.map(element => {
-              return (
-                <DraggableElement
-                  key={element.id}
-                  id={element.id}
-                  element={element}
-                  isSelected={selectedElement === element.id}
-                  onSelect={() => setSelectedElement(element.id)}
-                  onResize={handleResizeDrag}
-                />
-              )
-            })}
-
+      {/* CENTER PANEL - Pink Gradient Canvas (MOCKUP EXACT!) */}
+      <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-pink-300 via-pink-400 to-pink-500 p-8 shadow-2xl">
+        {/* "TASARIM ALANI" Watermark */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div className="text-white/30 font-black text-5xl text-center">
+            TASARIM ALANI<br/>
+            <span className="text-3xl">Pixel art'ını sürükle & bırak</span>
           </div>
-        </DndContext>
+        </div>
 
-        {/* Element Sayısı */}
-        <div className="mt-4 text-center text-sm text-gray-600">
-          Toplam {elements.length} element
+        {/* Zoom Badge */}
+        <div className="absolute top-4 right-4 bubble-card px-4 py-2 text-sm font-bold text-gray-700">
+          Zoom 140%
+        </div>
+        
+        {/* Canvas Area */}
+        <div className="relative mx-auto">
+          <DndContext onDragEnd={handleDragEnd}>
+            <div 
+              className="relative mx-auto bg-white/90 backdrop-blur-sm rounded-2xl overflow-hidden shadow-2xl"
+              style={{ 
+                width: '500px', 
+                height: '500px',
+              }}
+            >
+              {/* Base T-shirt Mockup */}
+              <img
+                src={mockupImage}
+                alt="T-shirt mockup"
+                className="absolute inset-0 w-full h-full object-contain pointer-events-none select-none"
+                draggable={false}
+              />
+
+              {/* Design Elements */}
+              {elements.map(element => {
+                return (
+                  <DraggableElement
+                    key={element.id}
+                    id={element.id}
+                    element={element}
+                    isSelected={selectedElement === element.id}
+                    onSelect={() => setSelectedElement(element.id)}
+                    onResize={handleResizeDrag}
+                  />
+                )
+              })}
+            </div>
+          </DndContext>
+        </div>
+      </div>
+
+      {/* RIGHT PANEL - Quests */}
+      <div className="bubble-card p-6">
+        <h3 className="font-black text-xl mb-4 flex items-center gap-2">
+          🏆 GÖREVLER
+        </h3>
+        
+        <div className="space-y-3">
+          {/* Quest 1 - Completed */}
+          <div className="p-4 rounded-2xl bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">✅</span>
+              <div>
+                <div className="font-bold">İlk Pixel Art</div>
+                <div className="text-sm opacity-90">+10 XP</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Quest 2 - Completed */}
+          <div className="p-4 rounded-2xl bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">✅</span>
+              <div>
+                <div className="font-bold">3 Renk Kullan</div>
+                <div className="text-sm opacity-90">+15 XP</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Quest 3 - Active */}
+          <div className="p-4 rounded-2xl bg-gradient-to-r from-pink-400 to-pink-500 text-white shadow-lg animate-pulse-custom">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">🏆</span>
+              <div>
+                <div className="font-bold">4 Açı Tasarla</div>
+                <div className="text-sm opacity-90">+50 XP 🔥</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Quest 4 - Locked */}
+          <div className="p-4 rounded-2xl bg-gradient-to-r from-pink-300 to-pink-400 text-white shadow-lg opacity-70">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">⬜</span>
+              <div>
+                <div className="font-bold">İlk Alışverişini Tamamla</div>
+                <div className="text-sm opacity-90">+100 XP + 🏆 Rozet</div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
